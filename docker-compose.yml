@@ -1,0 +1,25 @@
+version: '3'
+
+services:
+  android-mcp:
+    build: .
+    container_name: android-mcp-server
+    restart: unless-stopped
+    ports:
+      - "3001:3001"    # MCP Server
+      - "41641:41641"  # Tailscale
+    volumes:
+      - ./screenshots:/app/screenshots
+      - tailscale-data:/var/lib/tailscale
+    cap_add:
+      - NET_ADMIN      # Required for Tailscale
+      - NET_RAW        # Required for Tailscale
+    environment:
+      - TS_AUTHKEY=    # Set your Tailscale auth key here
+      - DEFAULT_PHONE_IP=100.77.199.68 # Set your default Android device Tailscale IP
+    devices:
+      - /dev/net/tun   # Required for Tailscale
+
+volumes:
+  tailscale-data:
+  n8n-data:
