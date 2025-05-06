@@ -13,13 +13,27 @@ This is a Docker-based Model Context Protocol (MCP) server that allows n8n to re
 
 1. Clone this repository
 2. Add your Tailscale auth key to `docker-compose.yml`
-3. Start the container:
+3. Build the image (first time only):
+
+```bash
+docker-compose -f docker-compose.yml -f docker-compose.build.yml build
+```
+
+4. Start the container:
 
 ```bash
 docker-compose up -d
 ```
 
 That's it! The MCP server will start, connect to Tailscale, and be ready to communicate with your Android devices.
+
+## Docker Compose Files
+
+This project uses multiple Docker Compose files for better compatibility:
+
+- `docker-compose.yml` - Main configuration file
+- `docker-compose.build.yml` - Build configuration (use when building the image)
+- `docker-compose.override.yml` - Contains device mappings and container name
 
 ## Device Setup
 
@@ -86,6 +100,9 @@ The MCP server provides the following tools to n8n workflows:
 - **Cannot connect to device**: Check that the device is on the same Tailscale network and has ADB enabled
 - **Tailscale not connecting**: Ensure your auth key is valid and has not expired
 - **Command failures**: Check the Docker logs with `docker logs android-mcp-server`
+- **Deployment errors**: If you see errors like "Ignoring unsupported options" or "invalid reference format", make sure you're using the correct Docker Compose files:
+  - For building: `docker-compose -f docker-compose.yml -f docker-compose.build.yml build`
+  - For running: `docker-compose up -d` (this automatically uses docker-compose.override.yml)
 
 ## Debugging
 

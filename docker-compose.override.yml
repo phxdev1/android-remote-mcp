@@ -1,0 +1,7 @@
+version: '3.8'
+
+services:
+  android-mcp:
+    container_name: android-mcp-server
+    devices:
+      - /dev/net/tun   # Required for Tailscale

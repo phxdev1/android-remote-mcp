@@ -1,10 +1,12 @@
-version: '3'
+version: '3.8'
 
 services:
   android-mcp:
-    build: .
-    container_name: android-mcp-server
-    restart: unless-stopped
+    image: android-mcp:latest
+    # Note: container_name is removed as it's deprecated
+    # Note: build option moved to a separate docker-compose.build.yml file
+    # Note: devices option moved to docker-compose.override.yml
+    restart: always
     ports:
       - "3001:3001"    # MCP Server
       - "41641:41641"  # Tailscale
@@ -17,9 +19,8 @@ services:
     environment:
       - TS_AUTHKEY=    # Set your Tailscale auth key here
       - DEFAULT_PHONE_IP=100.77.199.68 # Set your default Android device Tailscale IP
-    devices:
-      - /dev/net/tun   # Required for Tailscale
+    # Note: devices option moved to docker-compose.override.yml
 
 volumes:
   tailscale-data:
-  n8n-data:
+  # Removed unused n8n-data volume
