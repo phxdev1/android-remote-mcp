@@ -1,0 +1,117 @@
+# Android MCP Server
+
+This is a Docker-based Model Context Protocol (MCP) server that allows n8n to remotely control one or more Android devices over Tailscale using ADB. The server has Tailscale and ADB built in, so you only need to provide a Tailscale auth key to get started.
+
+## Features
+
+- **No Setup Required**: Tailscale and ADB are pre-installed in the Docker container
+- **Multiple Device Support**: Control any number of Android devices on your Tailscale network
+- **n8n Integration**: Works seamlessly with n8n's MCP Client Tool node
+- **Full ADB Capability**: Access all ADB features remotely through the MCP interface
+
+## Quick Start
+
+1. Clone this repository
+2. Add your Tailscale auth key to `docker-compose.yml`
+3. Start the container:
+
+```bash
+docker-compose up -d
+```
+
+That's it! The MCP server will start, connect to Tailscale, and be ready to communicate with your Android devices.
+
+## Device Setup
+
+For each Android device you want to control:
+
+1. Install Tailscale on the device from the Google Play Store
+2. Log in to your Tailscale account
+3. Note the device's Tailscale IP address (usually starts with 100.x.y.z)
+4. Enable Developer Options on the device
+5. Enable USB Debugging in Developer Options
+6. Connect the device to your computer via USB
+7. Run the following command to enable remote ADB:
+
+```bash
+adb tcpip 5555
+```
+
+8. You can now disconnect the USB cable
+
+## Connecting from n8n
+
+1. In n8n, add the "MCP Client Tool" node
+2. Set the SSE Endpoint URL:
+   - For the default device: `http://android-mcp-server:3001/sse`
+   - For a specific device: `http://android-mcp-server:3001/sse/100.x.y.z` (replace with the device's Tailscale IP)
+3. Save the node and test the connection
+
+## Available Tools
+
+The MCP server provides the following tools to n8n workflows:
+
+- `takeScreenshot`: Captures a screenshot from the device
+- `tapScreen`: Taps at specified coordinates
+- `swipeScreen`: Performs a swipe gesture
+- `sendText`: Types text on the device
+- `pressKey`: Presses a system key (home, back, etc.)
+- `launchApp`: Launches an application
+- `getSensorData`: Retrieves data from device sensors
+- `getDeviceInfo`: Gets device information
+- `listInstalledApps`: Lists installed applications
+- `executeShellCommand`: Runs a custom shell command
+
+## Environment Variables
+
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `TS_AUTHKEY` | Tailscale auth key (required) | "" |
+| `DEFAULT_PHONE_IP` | Default Android device Tailscale IP | 100.100.100.100 |
+| `PORT` | MCP server port | 3001 |
+
+## API Endpoints
+
+- `/sse` - MCP Protocol endpoint (default device)
+- `/sse/:device` - MCP Protocol endpoint (specific device)
+- `/devices` - List all connected devices
+- `/connect/:device` - Connect to a new device
+- `/status` - Server status including Tailscale and ADB info
+- `/health` - Health check endpoint
+- `/tailscale/status` - Tailscale status information
+- `/adb/restart` - Restart the ADB server
+
+## Troubleshooting
+
+- **Cannot connect to device**: Check that the device is on the same Tailscale network and has ADB enabled
+- **Tailscale not connecting**: Ensure your auth key is valid and has not expired
+- **Command failures**: Check the Docker logs with `docker logs android-mcp-server`
+
+## Debugging
+
+If you're having issues, you can access the Docker container:
+
+```bash
+docker exec -it android-mcp-server /bin/bash
+```
+
+From inside the container, you can run commands like:
+
+```bash
+# Check Tailscale status
+tailscale status
+
+# Check ADB devices
+adb devices
+
+# Test a connection
+adb -s 100.x.y.z:5555 shell echo "Connected!"
+```
+
+## Security Considerations
+
+The MCP server provides full control of your Android devices. To maintain security:
+
+1. Do not expose port 3001 to the public internet
+2. Use a separate Tailscale account or ACLs to restrict access
+3. Use ephemeral auth keys with appropriate expiration
